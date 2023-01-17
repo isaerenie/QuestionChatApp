@@ -19,14 +19,13 @@ public class SocketModule {
         this.socketService = socketService;
         server.addConnectListener(onConnected());
         server.addDisconnectListener(onDisconnected());
-        server.addEventListener("send_message", Message.class, onMessageReceived());
+        server.addEventListener("send_message", Message.class, onChatReceived());
     }
 
-    private DataListener<Message> onMessageReceived() {
+    private DataListener<Message> onChatReceived() {
         return (senderClient, data, ackSender) -> {
             log.info(data.toString());
-            socketService.sendSocketMessage(data.getRoom(), "get_message",
-                    senderClient, data.getMessage(), data.getUsername());
+            socketService.saveMessage(senderClient, data);
         };
     }
 

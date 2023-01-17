@@ -18,12 +18,12 @@ public class SocketService {
         this.messageService = messageService;
     }
 
-    public void sendSocketMessage(String room, String eventName, SocketIOClient senderClient, String message, String username) {
-        Collection<SocketIOClient> clients = senderClient.getNamespace().getRoomOperations(room).getClients();
-        for (SocketIOClient client : clients) {
+    public void sendSocketMessage(SocketIOClient senderClient, Message message, String room) {
+        for (
+                SocketIOClient client : senderClient.getNamespace().getRoomOperations(room).getClients()) {
             if (!client.getSessionId().equals(senderClient.getSessionId())) {
-                client.sendEvent(eventName,
-                        new Message(message, username, room, MessageType.SERVER));
+                client.sendEvent("get_message",
+                        message);
             }
         }
     }
@@ -34,7 +34,7 @@ public class SocketService {
                 .room(message.getRoom())
                 .username(message.getUsername())
                 .build());
-        sendSocketMessage(message.getRoom(), "get_message", senderClient, storedMessage.getMessage(), storedMessage.getUsername());
+        sendSocketMessage(senderClient, storedMessage, message.getRoom());
     }
 
     public void saveInfoMessage(SocketIOClient senderClient, String message, String room) {
@@ -43,6 +43,6 @@ public class SocketService {
                 .message(message)
                 .room(room)
                 .build());
-        sendSocketMessage(room, "get_message", senderClient, storedMessage.getMessage(), storedMessage.getUsername());
+        sendSocketMessage(senderClient, storedMessage, room);
     }
 }
